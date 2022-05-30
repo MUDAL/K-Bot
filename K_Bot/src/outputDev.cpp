@@ -21,14 +21,18 @@ static uint32_t percentToDutyCycle(uint8_t percentage)
 
 /**
  * @brief Configure pin of output device as an output pin
- * and ensure it's initial state is logic 0.
+ * and ensure it's initial state is logic 0. Pin configuration
+ * will be ignored if pin number isn't valid.
  * @param pin pin to be configured.
  * @return None
  */
 void OutputDev::ConfigurePin(int pin)
 {
-  pinMode(pin,OUTPUT);
-  digitalWrite(pin,LOW);
+  if(pin != INVALID_PIN)
+  {
+    pinMode(pin,OUTPUT);
+    digitalWrite(pin,LOW);
+  }
 }
 
 /**
@@ -39,12 +43,17 @@ void OutputDev::ConfigurePin(int pin)
  * @param pin2 second terminal of output device
  * @return None
  */
-OutputDev::OutputDev(uint8_t channel,uint8_t pwmPin,int pin1,int pin2)
+OutputDev::OutputDev(uint8_t channel,
+                     uint8_t pwmPin,
+                     uint8_t pin1,
+                     uint8_t pin2)
 {
+  //Init private variables
   this->channel = channel;
   this->pwmPin = pwmPin;
   this->pin1 = pin1;
   this->pin2 = pin2;
+  //Output device setup
   ledcSetup(this->channel,PWM_FREQ_HZ,PWM_TIMER_RES);
   ledcAttachPin(this->pwmPin,this->channel);
   OutputDev::ConfigurePin(this->pin1);

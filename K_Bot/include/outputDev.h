@@ -12,22 +12,22 @@
 
 #define PWM_TIMER_RES  8
 #define PWM_FREQ_HZ    2000
-#define INVALID_PIN    -1
+#define INVALID_PIN    255
 
 class OutputDev
 {
   private:
     uint8_t channel;
     uint8_t pwmPin;
-    int pin1;
-    int pin2;
+    uint8_t pin1;
+    uint8_t pin2;
     void ConfigurePin(int pin);
     
   public:
     OutputDev(uint8_t channel,
               uint8_t pwmPin,
-              int pin1 = INVALID_PIN,
-              int pin2 = INVALID_PIN);
+              uint8_t pin1 = INVALID_PIN,
+              uint8_t pin2 = INVALID_PIN);
     void EnablePWM(uint8_t percentDutyCycle);
     void DisablePWM(void);
     void WritePin(bool state);
