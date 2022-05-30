@@ -26,7 +26,7 @@ static uint32_t percentToDutyCycle(uint8_t percentage)
  * @param pin pin to be configured.
  * @return None
  */
-void OutputDev::ConfigurePin(int pin)
+void OutputDev::ConfigurePin(uint8_t pin)
 {
   if(pin != INVALID_PIN)
   {

@@ -21,7 +21,7 @@ class OutputDev
     uint8_t pwmPin;
     uint8_t pin1;
     uint8_t pin2;
-    void ConfigurePin(int pin);
+    void ConfigurePin(uint8_t pin);
     
   public:
     OutputDev(uint8_t channel,
