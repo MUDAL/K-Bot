@@ -20,30 +20,35 @@ static uint32_t percentToDutyCycle(uint8_t percentage)
 }
 
 /**
+ * @brief Configure pin of output device as an output pin
+ * and ensure it's initial state is logic 0.
+ * @param pin pin to be configured.
+ * @return None
+ */
+void OutputDev::ConfigurePin(int pin)
+{
+  pinMode(pin,OUTPUT);
+  digitalWrite(pin,LOW);
+}
+
+/**
  * @brief Initializes output device driven by L298N module
  * @param channel PWM channel 
  * @param pwmPin GPIO pin routed to PWM 'channel'
  * @param pin1 first terminal of output device
  * @param pin2 second terminal of output device
+ * @return None
  */
 OutputDev::OutputDev(uint8_t channel,uint8_t pwmPin,int pin1,int pin2)
 {
   this->channel = channel;
   this->pwmPin = pwmPin;
-  if(pin1 != INVALID_PIN) 
-  {
-    this->pin1 = pin1; 
-    pinMode(pin1,OUTPUT);
-    digitalWrite(pin1,LOW);
-  }
-  if(pin2 != INVALID_PIN) 
-  { 
-    this->pin2 = pin2;
-    pinMode(pin2,OUTPUT);
-    digitalWrite(pin2,LOW);
-  }
+  this->pin1 = pin1;
+  this->pin2 = pin2;
   ledcSetup(this->channel,PWM_FREQ_HZ,PWM_TIMER_RES);
   ledcAttachPin(this->pwmPin,this->channel);
+  OutputDev::ConfigurePin(this->pin1);
+  OutputDev::ConfigurePin(this->pin2);
   OutputDev::DisablePWM();
 }
 

@@ -2,10 +2,10 @@
 #include "outputDev.h"
 
 //Output devices driven by L298N module
-OutputDev pump(0,5);
-OutputDev brush(1,23);
-OutputDev leftWheel(2,15);
-OutputDev rightWheel(3,17);
+OutputDev pump(0,32,33); //channel, pwm pin, pin 1
+OutputDev brush(1,25,26); //channel, pwm pin, pin 1
+OutputDev leftWheel(2,27,17,16); //channel, pwm pin, pin 1, pin 2
+OutputDev rightWheel(3,23,19,18); //channel, pwm pin, pin 1, pin 2
 //Inbuilt Bluetooth
 BluetoothSerial bluetooth;
 
