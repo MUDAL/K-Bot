@@ -9,6 +9,12 @@ OutputDev rightWheel(3,23,19,18); //channel, pwm pin, pin 1, pin 2
 //Inbuilt Bluetooth
 BluetoothSerial bluetooth;
 
+/**
+ * @brief Processes data received from app via bluetooth.
+ * Control actions are made based on the app data received.
+ * @param appData: Data (character) sent by the app to the bot.
+ * @return None
+ */
 static void ProcessAppData(char appData)
 {
   static bool togglePump;

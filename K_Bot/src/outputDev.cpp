@@ -4,14 +4,17 @@
  * @brief Source file for output devices driven by L298N Module
  * These devices include:
  * 1. Water pump
- * 2. 3 DC gear motors
+ * 2. DC gear motors for
+ * a. Cleaning pad
+ * b. Left wheel 
+ * c. Right wheel
  */
 
 /**
  * @brief Converts duty cycle in percentage to clock cycles
  * 
- * @param percentage duty cycle in percentage 
- * @return uint32_t duty cycle expressed in clock cycles
+ * @param percentage: duty cycle in percentage 
+ * @return uint32_t: duty cycle expressed in clock cycles
  */
 static uint32_t percentToDutyCycle(uint8_t percentage)
 {
@@ -20,10 +23,10 @@ static uint32_t percentToDutyCycle(uint8_t percentage)
 }
 
 /**
- * @brief Configure pin of output device as an output pin
+ * @brief Configures pin of output device as an output pin
  * and ensure it's initial state is logic 0. Pin configuration
  * will be ignored if pin number isn't valid.
- * @param pin pin to be configured.
+ * @param pin: pin to be configured.
  * @return None
  */
 void OutputDev::ConfigurePin(uint8_t pin)
@@ -37,10 +40,10 @@ void OutputDev::ConfigurePin(uint8_t pin)
 
 /**
  * @brief Initializes output device driven by L298N module
- * @param channel PWM channel 
- * @param pwmPin GPIO pin routed to PWM 'channel'
- * @param pin1 first terminal of output device
- * @param pin2 second terminal of output device
+ * @param channel: PWM channel 
+ * @param pwmPin: GPIO pin routed to PWM 'channel'
+ * @param pin1: first terminal of output device
+ * @param pin2: second terminal of output device
  * @return None
  */
 OutputDev::OutputDev(uint8_t channel,
@@ -62,9 +65,9 @@ OutputDev::OutputDev(uint8_t channel,
 }
 
 /**
- * @brief Enable output device driven by L298N module.
+ * @brief Enables output device driven by L298N module.
  * When enabled, the output device is driven by a PWM signal.
- * @param percentDutyCycle Duty cycle of PWM signal (in %) required
+ * @param percentDutyCycle: Duty cycle of PWM signal (in %) required
  * to drive the output device.
  * @return None
  */
@@ -75,19 +78,19 @@ void OutputDev::EnablePWM(uint8_t percentDutyCycle)
 }
 
 /**
- * @brief Disable output device driven by L298N module.
+ * @brief Disables output device driven by L298N module.
  * When disabled, no PWM signal drives the output device.
  * @return None
  */
 void OutputDev::DisablePWM(void)
 {
-  ledcWrite(this->channel,0);
+  ledcWrite(this->channel,0); //duty cycle of pwm signal = 0
 }
 
 /**
  * @brief Writes a logic value to 'pin 1' of output device.
  * 
- * @param state value to be written to 'pin 1'.
+ * @param state: value to be written to 'pin 1'.
  * 'state' can either be true or false.
  * @return None
  */
@@ -99,8 +102,8 @@ void OutputDev::WritePin(bool state)
 /**
  * @brief Writes logic to pins 1 and 2 of output device.
  * 
- * @param state1 value to be written to 'pin 1'.
- * @param state2 value to be written to 'pin 2'.
+ * @param state1: value to be written to 'pin 1'.
+ * @param state2: value to be written to 'pin 2'.
  * States 1 and 2 can either be true or false.
  * @return None
  */
