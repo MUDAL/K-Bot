@@ -4,7 +4,7 @@
  * @brief Source file for output devices driven by L298N Module
  * These devices include:
  * 1. Water pump
- * 2. DC gear motors for
+ * 2. DC gear motors for:
  * a. Cleaning pad
  * b. Left wheel 
  * c. Right wheel
@@ -24,7 +24,7 @@ static uint32_t percentToDutyCycle(uint8_t percentage)
 
 /**
  * @brief Configures pin of output device as an output pin
- * and ensure it's initial state is logic 0. Pin configuration
+ * and ensures it's initial state is logic 0. Pin configuration
  * will be ignored if pin number isn't valid.
  * @param pin: pin to be configured.
  * @return None
