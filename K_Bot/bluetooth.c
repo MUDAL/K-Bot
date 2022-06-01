@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "uart.h"
 #include "dma.h"
+#include "bluetooth.h"
 
 void BT_RxInit(void)
 {
