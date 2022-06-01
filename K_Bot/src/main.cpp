@@ -10,10 +10,10 @@ enum SoftwareSerialPins
 SoftwareSerial bluetooth = SoftwareSerial(SS_RX_PIN,SS_TX_PIN);
 
 //Output devices driven by L298N module
-OutputDev pump(5); 
-OutputDev brush(6);
-OutputDev leftWheel(7,8); 
-OutputDev rightWheel(9,10); 
+OutputDev pump(3); 
+OutputDev brush(4);
+OutputDev leftWheel(5,6); 
+OutputDev rightWheel(7,8); 
 
 /**
  * @brief 
