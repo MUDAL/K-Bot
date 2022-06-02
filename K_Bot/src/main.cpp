@@ -10,8 +10,8 @@ enum SoftwareSerialPins
 SoftwareSerial bluetooth = SoftwareSerial(SS_RX_PIN,SS_TX_PIN);
 
 //Output devices driven by L298N module
-OutputDev pump(3); 
-OutputDev brush(4);
+OutputDev brush(3);
+OutputDev pump(4); 
 OutputDev leftWheel(5,6); 
 OutputDev rightWheel(7,8); 
 
@@ -35,6 +35,8 @@ static void ProcessAppData(char appData)
       brush.Write(toggleBrush);
       break;
     case '2': //Move Back
+      leftWheel.Write(true,false);
+      rightWheel.Write(true,false);
       break;
     case '3': //Turn Left
       break;
@@ -45,6 +47,8 @@ static void ProcessAppData(char appData)
     case '5': //Turn Right
       break;
     case '6': //Move Forward
+      leftWheel.Write(false,true);
+      rightWheel.Write(false,true);
       break;    
   }
 }
@@ -53,9 +57,6 @@ void setup()
 {
   pinMode(SS_RX_PIN,INPUT);
   bluetooth.begin(9600);
-
-  //Serial debug
-  Serial.begin(9600);
 }
 
 void loop() 
@@ -64,10 +65,6 @@ void loop()
   if(bluetooth.available())
   {
     char appData = bluetooth.read();
-    //======== Debug ===============
-    Serial.print("Received = ");
-    Serial.println(appData);
-    //==============================
     ProcessAppData(appData);
   }  
 }
