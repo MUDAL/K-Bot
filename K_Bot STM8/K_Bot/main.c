@@ -21,7 +21,7 @@
 	*11.| PC2  | Right motor PWM
 */
 
-#define PWM_PERIOD 400 //cycles
+#define MAX_SPEED	 395 //cycles
 
 /*	Functions	*/
 //Bluetooth
@@ -108,18 +108,16 @@ static void Actuators_Init(void)
 	GPIO_Init(GPIOD,GPIO_PIN_3,GPIO_MODE_OUT_PP_LOW_FAST);
 	//Timer 1 Init for PWM generation [5kHz frequency]
 	//Prescaler = 8, period = 400 cycles
-	TIM1_TimeBaseInit(7,TIM1_COUNTERMODE_UP,(PWM_PERIOD-1),0);
-	//Left motor PWM mode 2 Init[duty = period - pulse]
-	//Duty cycle = 99.5% (low for 2 cycles, high for 398) 
+	TIM1_TimeBaseInit(7,TIM1_COUNTERMODE_UP,399,0);
+	//Left motor PWM mode 2 Init[duty = pulse]
 	TIM1_OC1Init(TIM1_OCMODE_PWM2,TIM1_OUTPUTSTATE_ENABLE,
-							 TIM1_OUTPUTNSTATE_ENABLE,1,
+							 TIM1_OUTPUTNSTATE_ENABLE,395,
 							 TIM1_OCPOLARITY_LOW,TIM1_OCNPOLARITY_HIGH,
 							 TIM1_OCIDLESTATE_SET,
 							 TIM1_OCNIDLESTATE_RESET);
-	//Right motor PWM mode 2 Init[duty = period - pulse]
-	//Duty cycle = 99.5% (low for 2 cycles, high for 398) 
+	//Right motor PWM mode 2 Init[duty = pulse] 
 	TIM1_OC2Init(TIM1_OCMODE_PWM2,TIM1_OUTPUTSTATE_ENABLE,
-							 TIM1_OUTPUTNSTATE_ENABLE,1,
+							 TIM1_OUTPUTNSTATE_ENABLE,0,
 							 TIM1_OCPOLARITY_LOW,TIM1_OCNPOLARITY_HIGH,
 							 TIM1_OCIDLESTATE_SET,
 							 TIM1_OCNIDLESTATE_RESET);	
@@ -171,20 +169,20 @@ static void Motors_Reverse(void)
 
 static void LeftMotor_SetSpeed(uint16_t speed)
 {
-	if(speed >= (PWM_PERIOD-1))
+	if(speed > MAX_SPEED)
 	{//Invalid input
 		return;
 	}
-	TIM1_SetCompare1(PWM_PERIOD-1-speed);//Adjust duty cycle
+	TIM1_SetCompare1(speed);//Adjust duty cycle
 }
 
 static void RightMotor_SetSpeed(uint16_t speed)
 {
-	if(speed >= (PWM_PERIOD-1))
+	if(speed > MAX_SPEED)
 	{//Invalid input
 		return;
 	}
-	TIM1_SetCompare2(PWM_PERIOD-1-speed);//Adjust duty cycle	
+	TIM1_SetCompare2(speed);//Adjust duty cycle	
 }
 
 static void KBot_TurnRight(void)
