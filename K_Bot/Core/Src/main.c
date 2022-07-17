@@ -162,16 +162,15 @@ void InitMotorParam(motorParam_t* motor,
 
 /**
  * @brief Handles motor speed control*/
-void RegulateMotorSpeed(motorParam_t* motor,
-			uint32_t desiredPeriod,
-			uint32_t desiredMotorSpeed)
+void RegulateMotorSpeed(motorParam_t* motor,uint32_t desiredPeriod)
 {
+  const uint8_t tolerance = 10; //cycles
+  uint32_t desiredMotorSpeed = (5799 - 19*desiredPeriod); //review/experiment
+
   GetMotorSensorPeriod(motor);
-  /*	ADD CODE TO CALCULATE MOTOR SPEED FROM
-   * 	THE DESIRED MOTOR SENSOR'S PERIOD	*/
   if(motor->sensorPeriod <= desiredPeriod)
   {
-    if(motor->speed > (desiredMotorSpeed-10))//tolerance of 10 cycles
+    if(motor->speed > (desiredMotorSpeed-tolerance))
     {
 	motor->speed--;
     }
@@ -183,7 +182,7 @@ void RegulateMotorSpeed(motorParam_t* motor,
   }
   else
   {
-    if(motor->speed < (desiredMotorSpeed+10))//tolerance of 10 cycles
+    if(motor->speed < (desiredMotorSpeed+tolerance))
     {
 	motor->speed++;
     }
@@ -199,24 +198,12 @@ void RegulateMotorSpeed(motorParam_t* motor,
  * @brief Returns data received from the K-Bot app via bluetooth*/
 char GetBluetoothData(void)
 {
-  while((huart6.Instance->SR & USART_SR_RXNE) != USART_SR_RXNE){}
-  return huart6.Instance->DR;
-}
-
-void TogglePump(void)
-{
-  static uint8_t index;
-  const GPIO_PinState state[] = {GPIO_PIN_RESET,GPIO_PIN_SET};
-  index ^= 1;
-  HAL_GPIO_WritePin(pump_GPIO_Port,pump_Pin,state[index]);
-}
-
-void ToggleBrush(void)
-{
-  static uint8_t index;
-  const GPIO_PinState state[] = {GPIO_PIN_RESET,GPIO_PIN_SET};
-  index ^= 1;
-  HAL_GPIO_WritePin(brush_GPIO_Port,brush_Pin,state[index]);
+  char btData = '\0';
+  if((huart6.Instance->SR & USART_SR_RXNE) == USART_SR_RXNE)
+  {
+     btData = huart6.Instance->DR;
+  }
+  return btData;
 }
 
 /* USER CODE END 0 */
@@ -256,6 +243,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   char appData = '\0';
   bool speedBalanceEnable = false;
+  uint32_t targetPeriod = 155;
   motorParam_t leftMotor;
   motorParam_t rightMotor;
 
@@ -272,18 +260,17 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    RegulateMotorSpeed(&leftMotor,160); //test
     /* USER CODE BEGIN 3 */
-    RegulateMotorSpeed(&leftMotor,160,2499);
-
-    /*appData = GetBluetoothData();
+    appData = GetBluetoothData();
     switch(appData)
     {
       case '0': //Pump control
-	TogglePump();
+	HAL_GPIO_TogglePin(pump_GPIO_Port,pump_Pin);
 	speedBalanceEnable = false;
 	break;
       case '1': //Brush control
-	ToggleBrush();
+	HAL_GPIO_TogglePin(brush_GPIO_Port,brush_Pin);
 	speedBalanceEnable = false;
 	break;
       case '2': //Move back
@@ -310,7 +297,9 @@ int main(void)
     //Speed adjustment
     if(speedBalanceEnable)
     {
-    }*/
+	RegulateMotorSpeed(&leftMotor,targetPeriod);
+	RegulateMotorSpeed(&rightMotor,targetPeriod);
+    }
 
   }
   /* USER CODE END 3 */
