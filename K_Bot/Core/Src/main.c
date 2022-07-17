@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,6 +31,14 @@ typedef enum
   LEFT_MOTOR = 0,
   RIGHT_MOTOR
 }motor_t;
+
+typedef struct
+{
+  TIM_HandleTypeDef* htim;
+  motor_t type;
+  uint32_t sensorPeriod;
+  uint32_t speed;
+}motorParam_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -51,10 +59,6 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-static uint32_t leftSensorPeriod;
-static uint32_t rightSensorPeriod;
-static char appData;
-static uint8_t dummy;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,41 +75,41 @@ static void MX_USART6_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /**
- * @brief Returns period of output wave from speed sensor
- * in cycles. [Actual period = period(in cycles) / 10]
+ * @brief Get period of output wave from motor's speed sensor
+ * in cycles. [Actual period(in milliseconds) = period(in cycles) / 10]
  * */
-uint32_t GetSensorPeriod(TIM_HandleTypeDef* htim)
+void GetMotorSensorPeriod(motorParam_t* motor)
 {
-  uint32_t period = 0;
-  if((htim->Instance->SR & TIM_SR_CC1IF) == TIM_SR_CC1IF)
+  if((motor->htim->Instance->SR & TIM_SR_CC1IF) == TIM_SR_CC1IF)
   {
-      period = htim->Instance->CCR1;
+      motor->sensorPeriod = motor->htim->Instance->CCR1;
   }
-  return period;
 }
 
 /**
- * @brief Adjusts motor speed via PWM signal with 4kHz frequency.*/
-void SetMotorSpeed(motor_t motor,uint32_t speed)
+ * @brief Sets motor speed via PWM signal with 4kHz frequency.*/
+void SetMotorSpeed(motorParam_t* motor)
 {
-  if(speed > MAX_MOTOR_SPEED)
+  if(motor->speed > MAX_MOTOR_SPEED)
   {//Can't exceed the period (4000 cycles)
       return;
   }
-  switch(motor)
+  switch(motor->type)
   {
     case LEFT_MOTOR:
-      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,speed);
+      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->speed);
       break;
     case RIGHT_MOTOR:
-      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,speed);
+      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->speed);
       break;
   }
 }
 
-void AdvanceMotor(motor_t motor)
+/**
+ * @brief Move motor forward*/
+void AdvanceMotor(motorParam_t* motor)
 {
-  switch(motor)
+  switch(motor->type)
   {
     case LEFT_MOTOR:
       HAL_GPIO_WritePin(motorIn1_GPIO_Port,motorIn1_Pin,GPIO_PIN_SET);
@@ -118,9 +122,11 @@ void AdvanceMotor(motor_t motor)
   }
 }
 
-void ReverseMotor(motor_t motor)
+/**
+ * @brief Move motor backward*/
+void ReverseMotor(motorParam_t* motor)
 {
-  switch(motor)
+  switch(motor->type)
   {
     case LEFT_MOTOR:
       HAL_GPIO_WritePin(motorIn1_GPIO_Port,motorIn1_Pin,GPIO_PIN_RESET);
@@ -133,12 +139,84 @@ void ReverseMotor(motor_t motor)
   }
 }
 
+void StopMotors(void)
+{//Stop left motor
+  HAL_GPIO_WritePin(motorIn1_GPIO_Port,motorIn1_Pin,GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(motorIn2_GPIO_Port,motorIn2_Pin,GPIO_PIN_RESET);
+  //Stop right motor
+  HAL_GPIO_WritePin(motorIn3_GPIO_Port,motorIn3_Pin,GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(motorIn4_GPIO_Port,motorIn4_Pin,GPIO_PIN_RESET);
+}
+
+void InitMotorParam(motorParam_t* motor,
+		    TIM_HandleTypeDef* htim,
+		    motor_t type,
+		    uint32_t sensorPeriod,
+		    uint32_t speed)
+{
+  motor->htim = htim;
+  motor->type = type;
+  motor->sensorPeriod = sensorPeriod;
+  motor->speed = speed;
+}
+
+/**
+ * @brief Handles motor speed control*/
+void RegulateMotorSpeed(motorParam_t* motor,
+			uint32_t desiredPeriod,
+			uint32_t desiredMotorSpeed)
+{
+  GetMotorSensorPeriod(motor);
+  /*	ADD CODE TO CALCULATE MOTOR SPEED FROM
+   * 	THE DESIRED MOTOR SENSOR'S PERIOD	*/
+  if(motor->sensorPeriod <= desiredPeriod)
+  {
+    if(motor->speed > (desiredMotorSpeed-10))//tolerance of 10 cycles
+    {
+	motor->speed--;
+    }
+    else
+    {
+	motor->speed = desiredMotorSpeed;
+    }
+    SetMotorSpeed(motor);
+  }
+  else
+  {
+    if(motor->speed < (desiredMotorSpeed+10))//tolerance of 10 cycles
+    {
+	motor->speed++;
+    }
+    else
+    {
+	motor->speed = desiredMotorSpeed;
+    }
+    SetMotorSpeed(motor);
+  }
+}
+
 /**
  * @brief Returns data received from the K-Bot app via bluetooth*/
 char GetBluetoothData(void)
 {
   while((huart6.Instance->SR & USART_SR_RXNE) != USART_SR_RXNE){}
   return huart6.Instance->DR;
+}
+
+void TogglePump(void)
+{
+  static uint8_t index;
+  const GPIO_PinState state[] = {GPIO_PIN_RESET,GPIO_PIN_SET};
+  index ^= 1;
+  HAL_GPIO_WritePin(pump_GPIO_Port,pump_Pin,state[index]);
+}
+
+void ToggleBrush(void)
+{
+  static uint8_t index;
+  const GPIO_PinState state[] = {GPIO_PIN_RESET,GPIO_PIN_SET};
+  index ^= 1;
+  HAL_GPIO_WritePin(brush_GPIO_Port,brush_Pin,state[index]);
 }
 
 /* USER CODE END 0 */
@@ -176,7 +254,17 @@ int main(void)
   MX_TIM1_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  SetMotorSpeed(RIGHT_MOTOR,399);
+  char appData = '\0';
+  bool speedBalanceEnable = false;
+  motorParam_t leftMotor;
+  motorParam_t rightMotor;
+
+  InitMotorParam(&leftMotor,&htim2,LEFT_MOTOR,0,3999);
+  InitMotorParam(&rightMotor,&htim3,RIGHT_MOTOR,0,3999);
+
+  SetMotorSpeed(&leftMotor);
+  ReverseMotor(&leftMotor);
+  HAL_Delay(3000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -184,31 +272,46 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
-    leftSensorPeriod = GetSensorPeriod(&htim2);
-    rightSensorPeriod = GetSensorPeriod(&htim3);
-    HAL_Delay(500);
+    RegulateMotorSpeed(&leftMotor,160,2499);
 
-    appData = GetBluetoothData();
+    /*appData = GetBluetoothData();
     switch(appData)
     {
-      case '0':
-	dummy++;
+      case '0': //Pump control
+	TogglePump();
+	speedBalanceEnable = false;
 	break;
-      case '1':
+      case '1': //Brush control
+	ToggleBrush();
+	speedBalanceEnable = false;
 	break;
-      case '2':
+      case '2': //Move back
+	ReverseMotor(&leftMotor);
+	ReverseMotor(&rightMotor);
+	speedBalanceEnable = true;
 	break;
-      case '3':
+      case '3': //Turn left
+	speedBalanceEnable = false;
 	break;
-      case '4':
+      case '4': //Stop
+	StopMotors();
+	speedBalanceEnable = false;
 	break;
-      case '5':
+      case '5': //Turn right
+	speedBalanceEnable = false;
 	break;
-      case '6':
+      case '6': //Move forward
+	AdvanceMotor(&leftMotor);
+	AdvanceMotor(&rightMotor);
+	speedBalanceEnable = true;
 	break;
     }
+    //Speed adjustment
+    if(speedBalanceEnable)
+    {
+    }*/
+
   }
   /* USER CODE END 3 */
 }
@@ -502,12 +605,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, motorIn1_Pin|motorIn2_Pin|motorIn3_Pin|motorIn4_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, pump_Pin|brush_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : motorIn1_Pin motorIn2_Pin motorIn3_Pin motorIn4_Pin */
   GPIO_InitStruct.Pin = motorIn1_Pin|motorIn2_Pin|motorIn3_Pin|motorIn4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : pump_Pin brush_Pin */
+  GPIO_InitStruct.Pin = pump_Pin|brush_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 

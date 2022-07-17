@@ -73,6 +73,10 @@ void Error_Handler(void);
 #define motorIn4_GPIO_Port GPIOB
 #define bluetoothRx_Pin GPIO_PIN_7
 #define bluetoothRx_GPIO_Port GPIOC
+#define pump_Pin GPIO_PIN_8
+#define pump_GPIO_Port GPIOC
+#define brush_Pin GPIO_PIN_9
+#define brush_GPIO_Port GPIOC
 #define leftMotorPWM_Pin GPIO_PIN_8
 #define leftMotorPWM_GPIO_Port GPIOA
 #define rightMotorPWM_Pin GPIO_PIN_9
