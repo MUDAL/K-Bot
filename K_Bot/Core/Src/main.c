@@ -82,7 +82,7 @@ void GetMotorSensorPeriod(motorParam_t* motor)
 {
   if((motor->htim->Instance->SR & TIM_SR_CC1IF) == TIM_SR_CC1IF)
   {
-      motor->sensorPeriod = motor->htim->Instance->CCR1;
+    motor->sensorPeriod = motor->htim->Instance->CCR1;
   }
 }
 
@@ -92,7 +92,7 @@ void SetMotorSpeed(motorParam_t* motor)
 {
   if(motor->speed > MAX_MOTOR_SPEED)
   {//Can't exceed the period (4000 cycles)
-      return;
+    motor->speed = MAX_MOTOR_SPEED;
   }
   switch(motor->type)
   {
@@ -164,7 +164,8 @@ void InitMotorParam(motorParam_t* motor,
  * @brief Handles motor speed control*/
 void RegulateMotorSpeed(motorParam_t* motor,uint32_t desiredPeriod)
 {
-  const uint8_t tolerance = 10; //cycles
+  const uint8_t tolerance = 3; //cycles
+  //The equation below is affected by battery voltage
   uint32_t desiredMotorSpeed = (5799 - 19*desiredPeriod); //review/experiment
 
   GetMotorSensorPeriod(motor);
@@ -172,11 +173,11 @@ void RegulateMotorSpeed(motorParam_t* motor,uint32_t desiredPeriod)
   {
     if(motor->speed > (desiredMotorSpeed-tolerance))
     {
-	motor->speed--;
+      motor->speed--;
     }
     else
     {
-	motor->speed = desiredMotorSpeed;
+      motor->speed = desiredMotorSpeed;
     }
     SetMotorSpeed(motor);
   }
@@ -184,11 +185,11 @@ void RegulateMotorSpeed(motorParam_t* motor,uint32_t desiredPeriod)
   {
     if(motor->speed < (desiredMotorSpeed+tolerance))
     {
-	motor->speed++;
+      motor->speed++;
     }
     else
     {
-	motor->speed = desiredMotorSpeed;
+      motor->speed = desiredMotorSpeed;
     }
     SetMotorSpeed(motor);
   }
@@ -243,7 +244,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   char appData = '\0';
   bool speedBalanceEnable = false;
-  uint32_t targetPeriod = 155;
+  uint32_t targetPeriod = 115;
   motorParam_t leftMotor;
   motorParam_t rightMotor;
 
