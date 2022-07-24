@@ -22,6 +22,64 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
+/**
+ * K-Bot (Floor cleaning robot prototype)
+ *
+ * Components:
+ * 1. 12VDC pump
+ * 2. 3 TT gear motors:
+ * 	a. 2 motors for the robot's wheels
+ * 	b. 1 motor for the rotary cleaning pad
+ * 3. Bluetooth module
+ * 4. Optical speed sensors
+ *
+ * How it works:
+ * A mobile app is used to control with the robot via
+ * Bluetooth. The water pump, cleaning path and direction
+ * of motion of the robot can all be controlled by the app.
+ *
+ * The two motors used for the wheels do not spin at the same
+ * rate. The optical speed sensors are used together with some
+ * basic equations to correct the speeds of both motors for the
+ * sake of straight line motion in forward/reverse directions.
+ *
+ * An optical sensor output a square wave whose period varies
+ * inversely with the speed of the motor it is attached to.
+ *
+ * All timers used for PWM signal generation in this code are
+ * configured such that the maximum duty cycle (in clock cycles)
+ * is 3999 (i.e. 4000 cycles). [Check TIM1 and TIM2 configurations
+ * for more information].
+ *
+ * The timers used for PWM input capture are configured such that
+ * the period of the sensor's square wave in milliseconds equals the
+ * period of the timers in clock cycles divided by 10.
+ *
+ * The following data was obtained by performing some experiments
+ * on both motors and their speed sensors. The voltage of the battery
+ * used was 10.4V. [These readings change with voltage]
+ *
+ * For the left motor:
+ * N | Speed(cycles) | Period(ms)
+ * 1.| 3999          | 10
+ * 2.| 3499	     | 12
+ * 3.| 2999          | 14
+ * 4.| 2499          | 16
+ *
+ * For the right motor:
+ * N | Speed(cycles) | Period(ms)
+ * 1.| 3999          | 12
+ * 2.| 3499	     | 14
+ * 3.| 2999          | 16
+ * 4.| 2499          | 18
+ *
+ * To control the motors, speeds within the range of 2499-3999 cycles
+ * are used. Speeds below 2499 are considered slow or unfit to move the
+ * robot properly.
+ *
+ * Basic control equations were generated for both motors using the equation
+ * of a straight line.
+ * */
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +102,15 @@ typedef struct
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define MAX_MOTOR_SPEED	3999 //cycles
+
+enum MotorSensorPeriod
+{
+  PERIOD_12MS = 120,
+  PERIOD_13MS = 130,
+  PERIOD_14MS = 140,
+  PERIOD_15MS = 150,
+  PERIOD_16MS = 160
+};
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -164,9 +231,18 @@ void InitMotorParam(motorParam_t* motor,
  * @brief Handles motor speed control*/
 void RegulateMotorSpeed(motorParam_t* motor,uint32_t desiredPeriod)
 {
-  const uint8_t tolerance = 3; //cycles
-  //The equation below is affected by battery voltage
-  uint32_t desiredMotorSpeed = (5799 - 19*desiredPeriod); //review/experiment
+  const uint8_t tolerance = 1; //cycle(s)
+  uint32_t desiredMotorSpeed = 0;
+  //The equation(s) are affected by battery voltage
+  switch(motor->type)
+  {
+    case LEFT_MOTOR:
+      desiredMotorSpeed = (6499 - 25*desiredPeriod);
+      break;
+    case RIGHT_MOTOR:
+      desiredMotorSpeed = (6999 - 25*desiredPeriod);
+      break;
+  }
 
   GetMotorSensorPeriod(motor);
   if(motor->sensorPeriod <= desiredPeriod)
@@ -244,15 +320,17 @@ int main(void)
   /* USER CODE BEGIN 2 */
   char appData = '\0';
   bool speedBalanceEnable = false;
-  uint32_t targetPeriod = 115;
+  uint32_t targetPeriod = PERIOD_15MS;
   motorParam_t leftMotor;
   motorParam_t rightMotor;
 
-  InitMotorParam(&leftMotor,&htim2,LEFT_MOTOR,0,3999);
-  InitMotorParam(&rightMotor,&htim3,RIGHT_MOTOR,0,3999);
+  InitMotorParam(&leftMotor,&htim2,LEFT_MOTOR,0,1999);
+  InitMotorParam(&rightMotor,&htim3,RIGHT_MOTOR,0,1999);
 
   SetMotorSpeed(&leftMotor);
   ReverseMotor(&leftMotor);
+  SetMotorSpeed(&rightMotor);
+  ReverseMotor(&rightMotor);
   HAL_Delay(3000);
   /* USER CODE END 2 */
 
@@ -261,7 +339,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    RegulateMotorSpeed(&leftMotor,160); //test
+    RegulateMotorSpeed(&leftMotor,targetPeriod); //test
+    RegulateMotorSpeed(&rightMotor,targetPeriod); //test
     /* USER CODE BEGIN 3 */
     appData = GetBluetoothData();
     switch(appData)
