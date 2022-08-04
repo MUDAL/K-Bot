@@ -3,15 +3,15 @@
 #include "L298N_Dev.h"
 
 //Defines
-#define BLUETOOTH_RX_PIN     2
-#define BLUETOOTH_TX_PIN    -1
-#define SERVO_POS_DELAY   1500
+#define RX_PIN                 2
+#define TX_PIN                -1
+#define SERVO_POS_DELAY     1500
 //Bluetooth
-SoftwareSerial bluetooth = SoftwareSerial(BLUETOOTH_RX_PIN,BLUETOOTH_TX_PIN);
+SoftwareSerial bluetooth = SoftwareSerial(RX_PIN,TX_PIN);
 //Output devices driven by L298N module
-L298N_Dev pump(4); 
-L298N_Dev leftWheel(5,6); 
-L298N_Dev rightWheel(7,8); 
+L298N_Dev pump(8); 
+L298N_Dev leftWheel(A0,A1,10); 
+L298N_Dev rightWheel(A2,A3,11); 
 //Servo (Brush/cleaning pad is attached to servo arm)
 Servo servo;
 static bool servoActivated;
@@ -26,29 +26,33 @@ static void ProcessAppData(char appData)
   switch(appData)
   {
     case '0': //Pump control
-      togglePump ^= true;
+      togglePump ^= 1;
       pump.Write(togglePump);
       break;
     case '1': //Servo control
       servo.write(90);//set servo to default position
-      servoActivated ^= true;
+      servoActivated ^= 1;
       servoStartTime = millis();
       break;
     case '2': //Move Back
-      leftWheel.Write(true,false);
-      rightWheel.Write(true,false);
+      leftWheel.Write(1,0);
+      rightWheel.Write(1,0);
       break;
     case '3': //Turn Left
+      leftWheel.Write(1,0);
+      rightWheel.Write(0,1);
       break;
     case '4': //Stop
-      leftWheel.Write(false,false);
-      rightWheel.Write(false,false);
+      leftWheel.Write(0,0);
+      rightWheel.Write(0,0);
       break;
     case '5': //Turn Right
+      leftWheel.Write(0,1);
+      rightWheel.Write(1,0);
       break;
     case '6': //Move Forward
-      leftWheel.Write(false,true);
-      rightWheel.Write(false,true);
+      leftWheel.Write(0,1);
+      rightWheel.Write(0,1);
       break;    
   }
 }
@@ -56,9 +60,11 @@ static void ProcessAppData(char appData)
 void setup(void) 
 {
   Serial.begin(9600);
-  pinMode(BLUETOOTH_RX_PIN,INPUT);
+  pinMode(RX_PIN,INPUT);
   bluetooth.begin(9600);
-  servo.attach(3);
+  leftWheel.SetSpeed(120);
+  rightWheel.SetSpeed(120);
+  servo.attach(9);
 }
 
 void loop(void) 
@@ -68,12 +74,13 @@ void loop(void)
     char appData = bluetooth.read();
     ProcessAppData(appData);
   }
-  if(servoActivated && ((millis()-servoStartTime) >= SERVO_POS_DELAY))
+  if(servoActivated && ((millis() - servoStartTime) >= SERVO_POS_DELAY))
   {
     static int i;
-    int servoPos[] = {0,180};
+    const int servoPos[] = {0,180};
     servo.write(servoPos[i]);
     servoStartTime = millis();
     i ^= 1;
   }
 }
+
