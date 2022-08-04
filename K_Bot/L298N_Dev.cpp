@@ -5,11 +5,6 @@ void L298N_Dev::ConfigurePin(uint8_t pin)
   if(pin != INVALID_PIN)
   {
     pinMode(pin,OUTPUT);
-    digitalWrite(pin,LOW);
-  }
-  else
-  {
-    Serial.println("Error: Invalid pin number");
   }
 }
 

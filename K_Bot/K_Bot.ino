@@ -1,7 +1,6 @@
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "L298N_Dev.h"
-
 //Defines
 #define RX_PIN                 2
 #define TX_PIN                -1
@@ -18,16 +17,16 @@ static bool servoActivated;
 static uint32_t servoStartTime;
 
 /**
- * @brief Receive and process data received from mobile app
+ * @brief Receive and process commands from mobile app
 */
 static void ProcessAppData(char appData)
 {
-  static bool togglePump;
+  static bool pumpState;
   switch(appData)
   {
     case '0': //Pump control
-      togglePump ^= 1;
-      pump.Write(togglePump);
+      pumpState ^= 1;
+      pump.Write(pumpState);
       break;
     case '1': //Servo control
       servo.write(90);//set servo to default position
@@ -59,12 +58,15 @@ static void ProcessAppData(char appData)
 
 void setup(void) 
 {
-  Serial.begin(9600);
   pinMode(RX_PIN,INPUT);
   bluetooth.begin(9600);
   leftWheel.SetSpeed(120);
   rightWheel.SetSpeed(120);
   servo.attach(9);
+  //switch output devices off
+  pump.Write(0);
+  leftWheel.Write(0,0);
+  rightWheel.Write(0,0);
 }
 
 void loop(void) 
