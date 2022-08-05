@@ -9,7 +9,7 @@
 SoftwareSerial bluetooth = SoftwareSerial(RX_PIN,TX_PIN);
 //Output devices driven by L298N module
 L298N_Dev pump(8); 
-L298N_Dev leftWheel(A0,A1,10); 
+L298N_Dev leftWheel(5,6,3); 
 L298N_Dev rightWheel(A2,A3,11); 
 //Servo (Brush/cleaning pad is attached to servo arm)
 Servo servo;
@@ -60,8 +60,8 @@ void setup(void)
 {
   pinMode(RX_PIN,INPUT);
   bluetooth.begin(9600);
-  leftWheel.SetSpeed(120);
-  rightWheel.SetSpeed(120);
+  leftWheel.SetSpeed(90);
+  rightWheel.SetSpeed(90);
   servo.attach(9);
   //switch output devices off
   pump.Write(0);
