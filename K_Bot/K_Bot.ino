@@ -60,8 +60,8 @@ void setup(void)
 {
   pinMode(RX_PIN,INPUT);
   bluetooth.begin(9600);
-  leftWheel.SetSpeed(90);
-  rightWheel.SetSpeed(90);
+  leftWheel.SetSpeed(120);
+  rightWheel.SetSpeed(120);
   servo.attach(9);
   //switch output devices off
   pump.Write(0);
