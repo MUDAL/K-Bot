@@ -79,7 +79,7 @@ void loop(void)
   if(servoActivated && ((millis() - servoStartTime) >= SERVO_POS_DELAY))
   {
     static int i;
-    const int servoPos[] = {30,150};
+    const int servoPos[] = {0,180};
     servo.write(servoPos[i]);
     servoStartTime = millis();
     i ^= 1;
