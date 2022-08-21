@@ -21,6 +21,7 @@ communication. Automation of this system is a plan for the future.
 11. Water container    
 12. Plastic enclosure   
 13. HC05 Bluetooth module  
+14. TT gear motor and wheel (x2)  
 
 ## Choice of power supply  
 Initially regulated the 11.1v from the 3 Li-ion batteries to 5v using the LM2596 module.    
