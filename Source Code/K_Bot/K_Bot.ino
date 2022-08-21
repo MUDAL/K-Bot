@@ -18,6 +18,17 @@
 #define RIGHT_WHEEL_PIN1       A2
 #define RIGHT_WHEEL_PIN2       A3
 #define RIGHT_WHEEL_PWM_PIN    11
+//App commands
+enum AppCmd
+{
+  CONTROL_PUMP = '0',
+  CONTROL_SERVO = '1',
+  MOVE_BACK = '2',
+  TURN_LEFT = '3',
+  STOP = '4',
+  TURN_RIGHT = '5',
+  MOVE_FORWARD = '6'
+};
 //Bluetooth
 SoftwareSerial bluetooth = SoftwareSerial(RX_PIN,TX_PIN);
 //Output devices driven by L298N module
@@ -37,38 +48,38 @@ static void ProcessAppData(char appData)
   static bool pumpState;
   switch(appData)
   {
-    case '0': //Pump control
+    case CONTROL_PUMP: 
       pumpState ^= 1;
       pump.Write(pumpState);
       break;
-    case '1': //Servo control
+    case CONTROL_SERVO: 
       servo.write(90);//set servo to default position
       servoActivated ^= 1;
       servoStartTime = millis();
       break;
-    case '2': //Move Back
+    case MOVE_BACK: 
       leftWheel.SetSpeed(180);
       rightWheel.SetSpeed(180);
       leftWheel.Write(1,0);
       rightWheel.Write(1,0);
       break;
-    case '3': //Turn Left
+    case TURN_LEFT:
       leftWheel.SetSpeed(220);
       rightWheel.SetSpeed(220);
       leftWheel.Write(1,0);
       rightWheel.Write(0,1);
       break;
-    case '4': //Stop
+    case STOP: 
       leftWheel.Write(0,0);
       rightWheel.Write(0,0);
       break;
-    case '5': //Turn Right
+    case TURN_RIGHT:
       leftWheel.SetSpeed(220);
       rightWheel.SetSpeed(220);
       leftWheel.Write(0,1);
       rightWheel.Write(1,0);
       break;
-    case '6': //Move Forward
+    case MOVE_FORWARD:
       leftWheel.SetSpeed(180);
       rightWheel.SetSpeed(180);
       leftWheel.Write(0,1);
