@@ -42,4 +42,4 @@ probability of stripping the gears.
 K-Bot is controlled through the app developed using the MIT App Inventor. The following controls are made using the app:  
 1. Movement (forward, backward, right, left)     
 2. Activation and de-activation of the water pump (to enable/disable water dispensation)   
-3. Activation and de-activation of the servo (to enable/disable cleaning action)  
+3. Activation and de-activation of the servo (to enable/disable cleaning action).    
