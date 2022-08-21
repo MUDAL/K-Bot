@@ -35,7 +35,7 @@ the HC05 from experiencing resets due to the servo's power consumption.
 ## Choice of servo   
 Initially, a plastic gear servo was used but it didn't last long as the gears stripped when the servo fell to the  
 ground. Now, I could have replaced the gears but I decided to opt for the metal gear servo for strength and less  
-probability of stripping.  
+probability of stripping the gears.  
 
 ## How it works   
 K-Bot is controlled through the app developed using the MIT App Inventor. The following controls are made using the app:  
