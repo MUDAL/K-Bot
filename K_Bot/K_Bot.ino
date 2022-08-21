@@ -34,10 +34,14 @@ static void ProcessAppData(char appData)
       servoStartTime = millis();
       break;
     case '2': //Move Back
+      leftWheel.SetSpeed(180);
+      rightWheel.SetSpeed(180);
       leftWheel.Write(1,0);
       rightWheel.Write(1,0);
       break;
     case '3': //Turn Left
+      leftWheel.SetSpeed(220);
+      rightWheel.SetSpeed(220);
       leftWheel.Write(1,0);
       rightWheel.Write(0,1);
       break;
@@ -46,10 +50,14 @@ static void ProcessAppData(char appData)
       rightWheel.Write(0,0);
       break;
     case '5': //Turn Right
+      leftWheel.SetSpeed(220);
+      rightWheel.SetSpeed(220);
       leftWheel.Write(0,1);
       rightWheel.Write(1,0);
       break;
     case '6': //Move Forward
+      leftWheel.SetSpeed(180);
+      rightWheel.SetSpeed(180);
       leftWheel.Write(0,1);
       rightWheel.Write(0,1);
       break;    
@@ -60,11 +68,11 @@ void setup(void)
 {
   pinMode(RX_PIN,INPUT);
   bluetooth.begin(9600);
-  leftWheel.SetSpeed(120);
-  rightWheel.SetSpeed(120);
   servo.attach(9);
   //switch output devices off
   pump.Write(0);
+  leftWheel.SetSpeed(0);
+  rightWheel.SetSpeed(0);
   leftWheel.Write(0,0);
   rightWheel.Write(0,0);
 }
