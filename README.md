@@ -9,7 +9,7 @@ communication. Automation of this system is a plan for the future.
 
 ## Components used for the current prototype  
 1. Arduino Nano    
-2. L298N Module (x2)    
+2. L298N Module (x2) [One drives the wheels, the other drives the 12V pump]    
 3. MG996R Metal gear servo   
 4. LM2596 Buck converter    
 5. 7805 regulator    
