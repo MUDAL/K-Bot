@@ -1,4 +1,5 @@
 # K-Bot  
+
 The K-Bot is a floor cleaning robot with manual and automatic control.  
 The aim of this project is to reduce the cost of a floor cleaning robot without altering its quality.     
 The initial stage of the project involves developing and testing the manual aspects of the system.   
@@ -43,3 +44,8 @@ K-Bot is controlled through the app developed using the MIT App Inventor. The fo
 1. Movement (forward, backward, right, left)     
 2. Activation and de-activation of the water pump (to enable/disable water dispensation)   
 3. Activation and de-activation of the servo (to enable/disable cleaning action).    
+
+## Images  
+![final_setup_1](https://user-images.githubusercontent.com/46250887/192157365-19cdd883-760e-428e-8130-7129a3ef80be.jpg)
+![final_setup_2](https://user-images.githubusercontent.com/46250887/192157393-2e79f067-1a65-494d-bae1-3be972eb0757.jpg)
+![final_setup_3](https://user-images.githubusercontent.com/46250887/192157400-7864631c-ed82-4ce3-a9dc-bad8d5104dd5.jpg)
